@@ -8,7 +8,7 @@ class Attribute:
     
     def __init__(self, att_str):
         parts = att_str.split('{')
-        self.name, values_str = parts[0].split(' ')[1], parts[1]
+        self.name, values_str = parts[0].split(' ')[1].strip(), parts[1]
         for ch in ['}', ' ']:
             values_str = values_str.replace(ch, '')
         self.values = values_str.split(',')
