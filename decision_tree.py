@@ -4,8 +4,10 @@ Course: AI
 Author: Eduardo Vaca
 """
 
-class Attribute:
-    
+class Attribute(object):
+    """Class that represents an attribute from the dataset.
+    """
+
     def __init__(self, att_str):
         parts = att_str.split('{')
         self.name, values_str = parts[0].split(' ')[1].strip(), parts[1]
