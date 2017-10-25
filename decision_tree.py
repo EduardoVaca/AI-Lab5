@@ -61,6 +61,16 @@ class Dataset(object):
             ig -= len(results)/len(self.dataset)*self.entropy(results)
         return ig
 
+    def best_attribute(self, prev_entropy, attributes):
+        """Get the best attribute to split on
+        PARAMS:
+        - prev_entropy : previous entropy gotten
+        RETURNS:
+        - index of the best attribute to split
+        """
+        attr_ig = {i: self.information_gain(prev_entropy, attributes[i], i) for i in range(len(self.dataset[0])-1)}
+        return max(attr_ig.keys(), key=(lambda k: attr_ig[k]))
+
 
 def read_attributes():
     """Reads and obtain attributes of the data
@@ -107,7 +117,7 @@ def main():
     dataset = read_data()
     ds_entropy = dataset.entropy([ds[i] for ds in dataset.dataset for i in range(len(ds)) if i == len(attributes)-1 ])
     print(ds_entropy)
-    print(dataset.information_gain(ds_entropy, attributes[3], 3))
+    print('should split attr: {}'.format(dataset.best_attribute(ds_entropy, attributes)))
 
 if __name__ == '__main__':
     main()
