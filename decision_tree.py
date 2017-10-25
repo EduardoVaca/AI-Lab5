@@ -31,21 +31,35 @@ class Dataset(object):
         """
         self.dataset.append(data_str.split(','))
 
-    def entropy(self, index):
-        """Computs the entropy of an attribute from dataset
+    def entropy(self, values):
+        """Compute the entropy of an attribute from dataset
         PARAMS:
         - index : index of the attribute to calculate entropy
         RETURNS:
         - entropy of attribute
         """
         attributes = {}
-        for ds in self.dataset:
-            attributes[ds[index]] = attributes.get(ds[index], 0) + 1
+        for val in values:
+            attributes[val] = attributes.get(val, 0) + 1
         result = 0
         for _, v in attributes.items():
-            result -= v/len(self.dataset)*math.log(v/len(self.dataset), 2)
+            result -= v/len(values)*math.log(v/len(values), 2)
         return result
-        
+
+    def information_gain(self, prev_entropy, attribute, index):
+        """Compute information gain of a given attribute
+        PARAMS:
+        - prev_entropy : previous entropy gotten
+        - attribute : Attribute object to obtain its information gain
+        - index : index of that attribute in each row of dataset
+        RETURN:
+        - information gain value
+        """
+        ig = prev_entropy
+        for value in attribute.values:
+            results = [data[-1] for data in self.dataset if data[index] == value]
+            ig -= len(results)/len(self.dataset)*self.entropy(results)
+        return ig
 
 
 def read_attributes():
@@ -91,7 +105,9 @@ def main():
     for k, v in attributes.items():
         print('{} -> {}'.format(k, v))
     dataset = read_data()
-    print(dataset.entropy(len(attributes)-1))
+    ds_entropy = dataset.entropy([ds[i] for ds in dataset.dataset for i in range(len(ds)) if i == len(attributes)-1 ])
+    print(ds_entropy)
+    print(dataset.information_gain(ds_entropy, attributes[3], 3))
 
 if __name__ == '__main__':
     main()
