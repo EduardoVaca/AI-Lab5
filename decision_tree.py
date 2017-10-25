@@ -3,6 +3,7 @@ LAB 5: Decision trees
 Course: AI
 Author: Eduardo Vaca
 """
+import math
 
 class Attribute(object):
     """Class that represents an attribute from the dataset
@@ -29,6 +30,22 @@ class Dataset(object):
         """Adds new data row to the dataset
         """
         self.dataset.append(data_str.split(','))
+
+    def entropy(self, index):
+        """Computs the entropy of an attribute from dataset
+        PARAMS:
+        - index : index of the attribute to calculate entropy
+        RETURNS:
+        - entropy of attribute
+        """
+        attributes = {}
+        for ds in self.dataset:
+            attributes[ds[index]] = attributes.get(ds[index], 0) + 1
+        result = 0
+        for _, v in attributes.items():
+            result -= v/len(self.dataset)*math.log(v/len(self.dataset), 2)
+        return result
+        
 
 
 def read_attributes():
@@ -74,7 +91,7 @@ def main():
     for k, v in attributes.items():
         print('{} -> {}'.format(k, v))
     dataset = read_data()
-    print(dataset.dataset)
+    print(dataset.entropy(len(attributes)-1))
 
 if __name__ == '__main__':
     main()
