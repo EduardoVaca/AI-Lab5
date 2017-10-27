@@ -73,7 +73,23 @@ def split_on_attribute(dataset, attribute_index, attribute):
     for value in attribute.values:
         split_datasets.append([data for data in dataset if data[attribute_index] == value])
     return split_datasets
-    
+
+def id3(dataset, attributes, depth):
+    """ID3 Algorithm for decision trees
+    Instead of buidling the structure, prints it
+    """
+    depth += 1
+    ds_entropy = entropy([ds[i] for ds in dataset for i in range(len(ds)) if i == len(attributes)-1 ])
+    if ds_entropy == 0:
+        print(''.join([' ' for _ in range(depth*2)]) + 'ANSWER: ' + dataset[0][-1])
+        return
+    best_attr = best_attribute(dataset, ds_entropy, attributes)
+    attr_index = 0
+    for ds in split_on_attribute(dataset, best_attr, attributes[best_attr]):
+        if ds:
+            print(''.join([' ' for _ in range(depth*2)]) + attributes[best_attr].name + ': ' + attributes[best_attr].values[attr_index])
+            id3(ds, attributes, depth)
+        attr_index += 1
 
 def read_attributes():
     """Reads and obtain attributes of the data
@@ -115,16 +131,8 @@ def main():
     """Main program
     """
     attributes = read_attributes()
-    for k, v in attributes.items():
-        print('{} -> {}'.format(k, v))
     dataset = read_data()
-    ds_entropy = entropy([ds[i] for ds in dataset for i in range(len(ds)) if i == len(attributes)-1 ])
-    print(ds_entropy)
-    best_attr = best_attribute(dataset, ds_entropy, attributes)
-    print('should split attr: {}'.format(best_attr))
-    datasets = split_on_attribute(dataset, best_attr, attributes[best_attr])
-    for ds in datasets:
-        print(ds)
+    id3(dataset, attributes, -1)
 
 if __name__ == '__main__':
     main()
