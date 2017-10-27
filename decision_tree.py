@@ -20,57 +20,45 @@ class Attribute(object):
         return '{}: {}'.format(self.name, self.values)
 
 
-class Dataset(object):
-    """Class that represents the dataset tables with list of lists
+def entropy(values):
+    """Compute the entropy of an attribute from dataset
+    PARAMS:
+    - index : index of the attribute to calculate entropy
+    RETURNS:
+    - entropy of attribute
     """
-    def __init__(self):
-        self.dataset = []
+    attributes = {}
+    for val in values:
+        attributes[val] = attributes.get(val, 0) + 1
+    result = 0
+    for _, v in attributes.items():
+        result -= v/len(values)*math.log(v/len(values), 2)
+    return result
 
-    def add_data(self, data_str):
-        """Adds new data row to the dataset
-        """
-        self.dataset.append(data_str.split(','))
+def information_gain(dataset, prev_entropy, attribute, index):
+    """Compute information gain of a given attribute
+    PARAMS:
+    - prev_entropy : previous entropy gotten
+    - attribute : Attribute object to obtain its information gain
+    - index : index of that attribute in each row of dataset
+    RETURN:
+    - information gain value
+    """
+    ig = prev_entropy
+    for value in attribute.values:
+        results = [data[-1] for data in dataset if data[index] == value]
+        ig -= len(results)/len(dataset)*entropy(results)
+    return ig
 
-    def entropy(self, values):
-        """Compute the entropy of an attribute from dataset
-        PARAMS:
-        - index : index of the attribute to calculate entropy
-        RETURNS:
-        - entropy of attribute
-        """
-        attributes = {}
-        for val in values:
-            attributes[val] = attributes.get(val, 0) + 1
-        result = 0
-        for _, v in attributes.items():
-            result -= v/len(values)*math.log(v/len(values), 2)
-        return result
-
-    def information_gain(self, prev_entropy, attribute, index):
-        """Compute information gain of a given attribute
-        PARAMS:
-        - prev_entropy : previous entropy gotten
-        - attribute : Attribute object to obtain its information gain
-        - index : index of that attribute in each row of dataset
-        RETURN:
-        - information gain value
-        """
-        ig = prev_entropy
-        for value in attribute.values:
-            results = [data[-1] for data in self.dataset if data[index] == value]
-            ig -= len(results)/len(self.dataset)*self.entropy(results)
-        return ig
-
-    def best_attribute(self, prev_entropy, attributes):
-        """Get the best attribute to split on
-        PARAMS:
-        - prev_entropy : previous entropy gotten
-        RETURNS:
-        - index of the best attribute to split
-        """
-        attr_ig = {i: self.information_gain(prev_entropy, attributes[i], i) for i in range(len(self.dataset[0])-1)}
-        return max(attr_ig.keys(), key=(lambda k: attr_ig[k]))
-
+def best_attribute(dataset, prev_entropy, attributes):
+    """Get the best attribute to split on
+    PARAMS:
+    - prev_entropy : previous entropy gotten
+    RETURNS:
+    - index of the best attribute to split
+    """
+    attr_ig = {i: information_gain(dataset, prev_entropy, attributes[i], i) for i in range(len(dataset[0])-1)}
+    return max(attr_ig.keys(), key=(lambda k: attr_ig[k]))
 
 def read_attributes():
     """Reads and obtain attributes of the data
@@ -99,9 +87,9 @@ def read_data():
         value = input()
     while '%' in value:
         value = input()
-    dataset = Dataset()
+    dataset = []
     while True:
-        dataset.add_data(value)
+        dataset.append(value.split(','))
         try:
             value = input()
         except EOFError:
@@ -115,9 +103,9 @@ def main():
     for k, v in attributes.items():
         print('{} -> {}'.format(k, v))
     dataset = read_data()
-    ds_entropy = dataset.entropy([ds[i] for ds in dataset.dataset for i in range(len(ds)) if i == len(attributes)-1 ])
+    ds_entropy = entropy([ds[i] for ds in dataset for i in range(len(ds)) if i == len(attributes)-1 ])
     print(ds_entropy)
-    print('should split attr: {}'.format(dataset.best_attribute(ds_entropy, attributes)))
+    print('should split attr: {}'.format(best_attribute(dataset, ds_entropy, attributes)))
 
 if __name__ == '__main__':
     main()
