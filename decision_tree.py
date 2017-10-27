@@ -60,6 +60,21 @@ def best_attribute(dataset, prev_entropy, attributes):
     attr_ig = {i: information_gain(dataset, prev_entropy, attributes[i], i) for i in range(len(dataset[0])-1)}
     return max(attr_ig.keys(), key=(lambda k: attr_ig[k]))
 
+def split_on_attribute(dataset, attribute_index, attribute):
+    """Split dataset based on attribute
+    PARAMS:
+    - dataset : dataset to be splitted
+    - attribute_index : index of the attribute to be splitted
+    - attribute : attribute used to split
+    RETURNS:
+    - list of split datasets
+    """
+    split_datasets = []
+    for value in attribute.values:
+        split_datasets.append([data for data in dataset if data[attribute_index] == value])
+    return split_datasets
+    
+
 def read_attributes():
     """Reads and obtain attributes of the data
     RETURNS:
@@ -105,7 +120,11 @@ def main():
     dataset = read_data()
     ds_entropy = entropy([ds[i] for ds in dataset for i in range(len(ds)) if i == len(attributes)-1 ])
     print(ds_entropy)
-    print('should split attr: {}'.format(best_attribute(dataset, ds_entropy, attributes)))
+    best_attr = best_attribute(dataset, ds_entropy, attributes)
+    print('should split attr: {}'.format(best_attr))
+    datasets = split_on_attribute(dataset, best_attr, attributes[best_attr])
+    for ds in datasets:
+        print(ds)
 
 if __name__ == '__main__':
     main()
